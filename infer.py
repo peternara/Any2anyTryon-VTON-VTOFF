@@ -95,10 +95,14 @@ def generate_image(pipe, model_image_path, garment_image_path, prompt="", height
         garment_image = resize_by_height(garment_image, height)
         concat_image_list.append(garment_image)
 
+    # [zero_image(black), person(model_image, cloth_image] = [H, Wx3, C=3]               
     image = Image.fromarray(np.concatenate([np.array(img) for img in concat_image_list], axis=1))
-    
+
+                      
     mask = np.zeros_like(np.array(image))
     mask[:,:width] = 255
+
+    # [white_image, black_image, black_image] = [H, Wx3, C=3]  
     mask_image = Image.fromarray(mask)
     
     image = pipe(
