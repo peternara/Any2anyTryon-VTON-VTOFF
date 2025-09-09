@@ -216,6 +216,16 @@ class FluxTryonPipeline(FluxInpaintPipeline):
         callback_on_step_end_tensor_inputs: List[str] = ["latents"],
         max_sequence_length: int = 512,
     ):
+        # 두개의 입력 변화 - image, mask_image  == [H, Wx3, C] pil image
+        # 1. image = [black(zero)_image, person_image, cloth_image]
+        #    a. tensor 변환 - self.image_processor.preprocess()
+        #    b. latent 변환 - self.prepare_latents()
+        #        b.1 3개를 분리 -> 각각 vae -> 다시 합침 - self._encode_vae_image()
+        #        b.2 2x2 패치 형태로 전화 (for transformer 입력) - self._pack_latents
+        # 2. mask = [white_image, black_image, black_image]
+        #    a. tensor 변환 - self.image_processor.preprocess()
+        #    b. latent 최종 크기로만 변환 - self.prepare_latents()
+         
         height = height or self.default_sample_size * self.vae_scale_factor
         width = width or self.default_sample_size * self.vae_scale_factor
 
